@@ -2,7 +2,7 @@
 require("config")
 require("cocos.init")
 require("framework.init")
-
+require("app.init")
 local AppBase = require("framework.AppBase")
 local MyApp = class("MyApp", AppBase)
 
@@ -12,7 +12,9 @@ end
 
 function MyApp:run()
     cc.FileUtils:getInstance():addSearchPath("res/")
-    self:enterScene("MainScene")
+  
+    local scene = require("app.gamma.logoscene").new()
+    display.replaceScene(scene)
 end
 
 return MyApp

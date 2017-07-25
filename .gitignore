@@ -1,4 +1,6 @@
 *.log
+res/
 frameworks/runtime-src/proj.android/app/
 frameworks/runtime-src/proj.android/libcocos2dx/
 frameworks/runtime-src/proj.ios_mac/phz.xcodeproj/xcuserdata/
+frameworks/runtime-src/proj.win32/
