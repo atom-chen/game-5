@@ -19,17 +19,19 @@ local function decode(data)
 	return crypto.decodeBase64(data)
 end
 
+
+
 function HttpHelper.sendMessage(cmd,data,callback)
 	local conf = clone(cmd)
 	print("requst:",cmd.request)
-	send(login_server..conf.domain,protobuf.encode(conf.request, data),function(event)
-		
+	send(login_server..conf.domain,protobuf.encode(conf.request, data),function(event)		
 		if event.name == "completed" then
 			local request = event.request
 			if request:getResponseStatusCode() == 200 then
 				if callback then
 					local d = decode(request:getResponseData())
-					local response,errormsg = protobuf.decode(conf.response,d,string.len(d))
+					local response,errormsg = protobuf.decode(conf.response,d)
+					print("response:",cmd.response)
 					if response == false then
 						print(string.format("############response error: %s",conf.response),errormsg)
 					else
