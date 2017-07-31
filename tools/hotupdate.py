@@ -1,5 +1,5 @@
 # coding:utf-8
-import os,shutil,filecmp,hashlib,json
+import os,shutil,filecmp,hashlib,json,zlib,threading
 
 
 QUICK_V3_ROOT 	= os.getenv("QUICK_V3_ROOT")
@@ -11,7 +11,21 @@ ONLINE_VERSION	= "1.0.0"
 OUT_VERSION		= "1.0.1"
 BUILD_NUM		= None
 PROJECT_NAME	= "phz"
+PACKAGE_NAME 	= "{0}/package".format(PROJECT_NAME)
 
+FINAL_SVN_PATH = os.path.dirname(os.path.join(SVN_PATH,PACKAGE_NAME))
+if not os.path.exists(FINAL_SVN_PATH):
+	os.mkdir(FINAL_SVN_PATH)
+
+def getBuilderNum():
+	num = 0
+	try:
+		with open(PACKAGE_NAME,"r") as f:
+			data = json.loads(f.read())
+	except Exception,e:
+		pass
+	num = num + 1
+	return num
 
 def backup():
 	if OUT_VERSION == None:
@@ -42,6 +56,7 @@ def getDiff(oldversion,newversion):
 		root += "/"
 	size = 0
 	count = 0
+
 	for parent,dirnames,filenames in os.walk(root):
 		for filename in filenames:                        #输出文件信息
 			if filename != ".DS_Store":
@@ -53,20 +68,26 @@ def getDiff(oldversion,newversion):
 				count += 1
 				size += info[1]
 
-	conf = {"verion":newversion,"files":files,"size":size,"count":count}
+	conf = {"verion":newversion,"files":files,"size":size,"count":count,"build":BUILD_NUM}
 
-
-	with open(os.path.join(SVN_PATH,"{0}.package".format(PROJECT_NAME)),"w+") as f:
+	with open(os.path.join(SVN_PATH,PACKAGE_NAME),"w+") as f:
 		f.write(json.dumps(conf))
 
 
 def upload():
-	pass
+	src = "{0}_{1}/res".format(PROJECT_NAME,OUT_VERSION)
+	dst = "{0}/{1}.{2}".format(PROJECT_NAME,OUT_VERSION,BUILD_NUM)
+	shutil.copytree(os.path.join(BACKUP_PATH,src),os.path.join(SVN_PATH,dst))
 
 
 def main():
+	global BUILD_NUM
+	BUILD_NUM = getBuilderNum()
 	backup()
-	diff = getDiff(ONLINE_VERSION,OUT_VERSION)
+	getDiff(ONLINE_VERSION,OUT_VERSION)
+	upload()
+
+
 
 if __name__ == "__main__":
 	main()
